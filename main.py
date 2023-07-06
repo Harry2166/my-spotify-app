@@ -14,11 +14,42 @@ def get_token():
         "Authorization" : f"Basic {encoded}",
         "Content-Type" : "application/x-www-form-urlencoded"
     }
-    data = {"grant_type" : "client_credentials"}
+    data = {"grant_type" : "client_credentials", "scopes" : "user-read-private"}
     result = post(url, headers=headers, data=data)
     json_result = json.loads(result.content)
     token = json_result["access_token"]
     return token
 
-def get_auth_header(token):
-    return {"Authorization":f"Bearer {token}"}
+universal_token = get_token()
+
+def get_auth_header():
+    return {"Authorization":f"Bearer {universal_token}"}
+
+def get_spotify_id(id,limit=1):
+    url = "https://api.spotify.com/v1/search"
+    headers = get_auth_header()
+    query = f"?q={id}&type=artist&limit={limit}"
+
+    query_url = url + query
+    result = get(query_url, headers=headers)
+    results = json.loads(result.content)  
+    return results["artists"]["items"][0]["id"]
+
+def get_artist(artist):
+    headers = get_auth_header()
+    artist_id = get_spotify_id(artist)
+    url = f"https://api.spotify.com/v1/artists/{artist_id}"
+
+    result = get(url, headers=headers)
+    results = json.loads(result.content)
+    return results
+
+def get_my_data():
+    headers = get_auth_header()
+    result = get("https://api.spotify.com/v1/me", headers=headers)
+    results = json.loads(result.content)
+
+    return results
+
+michael_jackson_data = get_artist("micahel jackson")
+print(michael_jackson_data)
