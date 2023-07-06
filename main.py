@@ -36,38 +36,38 @@ class App:
             token_endpoint="https://accounts.spotify.com/api/token?" # this one is wrong!! -> will need to figure out the token endpoint for this or else i might have to change
         )
     
-    async def get_access_token(self):
-        request = aiohttp.request(
-            method="POST",
-            url="https://api.spotify.com/v1/me/shows?offset=0&limit=20",
-            data = {
-                "grant_type":    "authorization_code",
-                "code":          code,
-                "redirect_uri":  REDIRECT_URL,
-                "client_secret": CLIENT_SECRET,
-                "client_id":     CLIENT_ID,
-                },
-            #params,
-        )
+    # async def get_access_token(self):
+    #     request = aiohttp.request(
+    #         method="POST",
+    #         url="https://api.spotify.com/v1/me/shows?offset=0&limit=20",
+    #         data = {
+    #             "grant_type":    "authorization_code",
+    #             "code":          code,
+    #             "redirect_uri":  REDIRECT_URL,
+    #             "client_secret": CLIENT_SECRET,
+    #             "client_id":     CLIENT_ID,
+    #             },
+    #         #params,
+    #     )
 
-    async def get_playlists(self):
-        access_token = await self.get_access_token()
+    # async def get_playlists(self):
+    #     access_token = await self.get_access_token()
 
-        headers = {
-            'Authorization': f'Bearer {access_token}'
-        }
+    #     headers = {
+    #         'Authorization': f'Bearer {access_token}'
+    #     }
 
-        request = aiohttp.request(
-            method="GET",
-            url="https://api.spotify.com/v1/me/shows?offset=0&limit=20",
-            #data,
-            #params,
-            headers=headers,
-        )
+    #     request = aiohttp.request(
+    #         method="GET",
+    #         url="https://api.spotify.com/v1/me/shows?offset=0&limit=20",
+    #         #data,
+    #         #params,
+    #         headers=headers,
+    #     )
 
-        async with request as resp:
-            data = await resp.json()
-        return data
+    #     async with request as resp:
+    #         data = await resp.json()
+    #     return data
 
     async def login_click(self,e):
         print("You pressed login")
@@ -78,9 +78,9 @@ class App:
         await self.page.clean_async()
         await self.page.logout_async()
 
-    async def playlists_click(self,e):
-        all_playlists = await self.get_playlists()
-        print(all_playlists)
+    # async def playlists_click(self,e):
+    #     all_playlists = await self.get_playlists()
+    #     print(all_playlists)
 
     async def login_screen(self):
         self.login_btn = ft.ElevatedButton(text="log in", on_click=self.login_click)

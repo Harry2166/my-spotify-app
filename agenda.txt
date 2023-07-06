@@ -1,6 +1,9 @@
 '''
 WHAT WILL THIS APP DO?
 
+- looks like i now have to learn about the requests library in python i guess...
+- will have to abandon flet then, will use another python GUI framework
+
 - as of now, i dont know but i will try to list down as many functionalities as I can
     - make playlist
     - delete playlist
