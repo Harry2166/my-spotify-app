@@ -5,6 +5,7 @@ import base64
 import json
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
+from webbrowser import open
 
 REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
 BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -22,7 +23,7 @@ class Spotify:
     
     def authorize(self):
         authorization_url, state = self.spotify.authorization_url(BASE_AUTH_URL)
-        print('Please go here and authorize: ', authorization_url)
+        open(authorization_url)
 
         redirect_response = input('Paste the full redirect URL here: ')
         auth = HTTPBasicAuth(CLIENT_ID, CLIENT_SECRET)

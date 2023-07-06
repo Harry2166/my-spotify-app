@@ -1,8 +1,11 @@
 '''
 WHAT WILL THIS APP DO?
 
-- looks like i now have to learn about the requests library in python i guess...
-- will have to abandon flet then, will use another python GUI framework
+--  login screen --
+- when you press login, you will be transported to the redirect URI site
+- from there, you will be asked to place the entire redirect url on a textbox that is recently placed there
+- there is a button that says "submit" and once pressed, you will be go to the main page
+- will plan to implement them using Tkinter (most simple)
 
 - as of now, i dont know but i will try to list down as many functionalities as I can
     - make playlist
