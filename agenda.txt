@@ -1,6 +1,6 @@
 '''
 WHAT WILL THIS APP DO?
-- will need to decide on a GUI framework
+
 - as of now, i dont know but i will try to list down as many functionalities as I can
     - make playlist
     - delete playlist

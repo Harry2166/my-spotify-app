@@ -10,6 +10,7 @@ import aiohttp
 import base64
 
 REDIRECT_URL = "http://localhost/api/oauth/redirect"
+BASE_API_URL = "https://accounts.spotify.com/authorize?"
 
 class MyAuthorization(Authorization):
     def __init__(self, *args, **kwargs):
@@ -32,8 +33,41 @@ class App:
             user_scopes=["playlist-read-private"],
             redirect_url=REDIRECT_URL,
             authorization_endpoint="https://accounts.spotify.com/authorize?",
-            token_endpoint="https://accounts.spotify.com/api/token"
+            token_endpoint="https://accounts.spotify.com/api/token?" # this one is wrong!! -> will need to figure out the token endpoint for this or else i might have to change
         )
+    
+    async def get_access_token(self):
+        request = aiohttp.request(
+            method="POST",
+            url="https://api.spotify.com/v1/me/shows?offset=0&limit=20",
+            data = {
+                "grant_type":    "authorization_code",
+                "code":          code,
+                "redirect_uri":  REDIRECT_URL,
+                "client_secret": CLIENT_SECRET,
+                "client_id":     CLIENT_ID,
+                },
+            #params,
+        )
+
+    async def get_playlists(self):
+        access_token = await self.get_access_token()
+
+        headers = {
+            'Authorization': f'Bearer {access_token}'
+        }
+
+        request = aiohttp.request(
+            method="GET",
+            url="https://api.spotify.com/v1/me/shows?offset=0&limit=20",
+            #data,
+            #params,
+            headers=headers,
+        )
+
+        async with request as resp:
+            data = await resp.json()
+        return data
 
     async def login_click(self,e):
         print("You pressed login")
@@ -43,6 +77,10 @@ class App:
         print("You pressed logout")
         await self.page.clean_async()
         await self.page.logout_async()
+
+    async def playlists_click(self,e):
+        all_playlists = await self.get_playlists()
+        print(all_playlists)
 
     async def login_screen(self):
         self.login_btn = ft.ElevatedButton(text="log in", on_click=self.login_click)
@@ -56,9 +94,11 @@ class App:
 
         filler_text = ft.Text("Hello There!")
         self.logout_btn = ft.ElevatedButton("logout", on_click=self.logout_click)
+        playlist_btn = ft.ElevatedButton("check playlists", on_click=self.playlists_click)
 
         controls = [
             filler_text,
+            playlist_btn,
             self.logout_btn
         ]
 
@@ -78,8 +118,25 @@ class App:
     async def main(cls, page: ft.Page):
 
         async def on_login(e):
-            print("you got in")
-            await App(page).switching_to_main()
+            if e.error:
+                async def close(e):
+                    error_warning.open = False
+                    await page.update_async()
+
+                error_warning = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Text("ERROR"),
+                    content=ft.Text(f"{e.error}"),
+                    actions=[
+                        ft.TextButton("Ok", on_click=close),
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END,
+                    open=True
+                )
+                await page.add_async(error_warning)
+                await page.update_async()
+            else:
+                await App(page).switch_to_feed()
 
         async def on_logout(e):
             print("you got out")
