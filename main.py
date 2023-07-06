@@ -25,6 +25,7 @@ class MyAuthorization(Authorization):
 class App:
     page: ft.Page
     login_btn : ft.ElevatedButton = field(init=False)
+    logout_btn : ft.ElevatedButton = field(init=False)
     provider = OAuthProvider(
             client_id=CLIENT_ID,
             client_secret=CLIENT_SECRET,
@@ -38,6 +39,11 @@ class App:
         print("You pressed login")
         await self.page.login_async(self.provider, authorization=MyAuthorization)
 
+    async def logout_click(self,e):
+        print("You pressed logout")
+        await self.page.clean_async()
+        await self.page.logout_async()
+
     async def login_screen(self):
         self.login_btn = ft.ElevatedButton(text="log in", on_click=self.login_click)
 
@@ -45,6 +51,22 @@ class App:
             self.login_btn
         ]
         await self.page.add_async(*controls)
+
+    async def main_page(self):
+
+        filler_text = ft.Text("Hello There!")
+        self.logout_btn = ft.ElevatedButton("logout", on_click=self.logout_click)
+
+        controls = [
+            filler_text,
+            self.logout_btn
+        ]
+
+        await self.page.add_async(*controls)
+    
+    async def switching_to_main(self):
+        await self.page.clean_async()
+        await App(self.page).main_page()
 
     @classmethod
     async def default(cls, page: ft.Page) -> App:
@@ -57,8 +79,14 @@ class App:
 
         async def on_login(e):
             print("you got in")
+            await App(page).switching_to_main()
+
+        async def on_logout(e):
+            print("you got out")
+            await App(page).login_screen()
 
         page.on_login = on_login
+        page.on_logout = on_logout
         await App(page).login_screen()
 
 ft.app(target=App.main,port=80, view=ft.WEB_BROWSER)
