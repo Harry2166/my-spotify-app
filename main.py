@@ -20,3 +20,5 @@ def get_token():
     token = json_result["access_token"]
     return token
 
+def get_auth_header(token):
+    return {"Authorization":f"Bearer {token}"}
