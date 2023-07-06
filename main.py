@@ -14,7 +14,7 @@ def get_token():
         "Authorization" : f"Basic {encoded}",
         "Content-Type" : "application/x-www-form-urlencoded"
     }
-    data = {"grant_type" : "client_credentials", "scopes" : "user-read-private"}
+    data = {"grant_type" : "client_credentials"}
     result = post(url, headers=headers, data=data)
     json_result = json.loads(result.content)
     token = json_result["access_token"]
