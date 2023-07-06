@@ -3,6 +3,12 @@ from config import CLIENT_ID, CLIENT_SECRET
 from requests import post, get
 import base64
 import json
+from requests_oauthlib import OAuth2Session
+from requests.auth import HTTPBasicAuth
+
+REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
+BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
+TOKEN_URL = "https://accounts.spotify.com/api/token"
 
 def get_token():
     username = f"{CLIENT_ID}:{CLIENT_SECRET}"
@@ -51,5 +57,29 @@ def get_my_data():
 
     return results
 
-michael_jackson_data = get_artist("micahel jackson")
-print(michael_jackson_data)
+### Spotify OAuth 2
+
+scope = [
+    "user-read-email",
+    "playlist-read-collaborative"
+]
+
+spotify = OAuth2Session(CLIENT_ID, scope=scope, redirect_uri=REDIRECT_URL)
+
+authorization_url, state = spotify.authorization_url(BASE_AUTH_URL)
+print('Please go here and authorize: ', authorization_url)
+
+# Get the authorization verifier code from the callback url
+redirect_response = input('\n\nPaste the full redirect URL here: ')
+
+auth = HTTPBasicAuth(CLIENT_ID, CLIENT_SECRET)
+
+# Fetch the access token
+token = spotify.fetch_token(TOKEN_URL, auth=auth,
+        authorization_response=redirect_response)
+
+print(token)
+
+# Fetch a protected resource, i.e. user profile
+r = spotify.get('https://api.spotify.com/v1/me')
+print(r.content)
