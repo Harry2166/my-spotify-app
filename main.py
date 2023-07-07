@@ -6,19 +6,21 @@ import json
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
 from webbrowser import open
-from kivy.app import App
+from kivymd.app import MDApp
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.image import Image, AsyncImage
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+from kivymd.uix.behaviors.backgroundcolor_behavior import BackgroundColorBehavior
 
 REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
 BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 SCOPE = [
         "user-read-email",
-        "playlist-read-collaborative"
+        "playlist-read-collaborative",
+        "playlist-read-private"
         ]
 
 class Spotify:
@@ -78,18 +80,29 @@ class Spotify:
 
         return results
     
+    def get_user_playlists(self):
+        user_id = self.get_my_data()["id"]
+        url = f"https://api.spotify.com/v1/users/{user_id}/playlists?limit=5"
+        result = get(url, headers=self.headers)
+        results = json.loads(result.content)
+
+        return results
+    
 spotify = Spotify()
 
-class SpotifyApp(App):
+class SpotifyApp(MDApp):
     authorization_data = ""
     profile_data = ""
     controls = []
+    BackgroundColorBehavior.background = [1,1,1,255]
     def build(self):
         self.window = GridLayout()
         self.window.cols = 1
         self.window.size_hint = (0.6, 0.7)
         self.window.pos_hint = {"center_x": 0.5, "center_y":0.5}
-
+        return self.window
+    
+    def on_start(self):
         self.msg = Label(
             text="Please login to your Spotify and paste the entire URL of the site after your login"
         )
@@ -124,30 +137,7 @@ class SpotifyApp(App):
         ]
 
         self.add_widgets()
-
-        return self.window
     
-    def add_widgets(self):
-        for elem in self.controls:
-            self.window.add_widget(elem)
-
-    def remove_widgets(self):
-        for elem in self.controls:
-            self.window.remove_widget(elem)
-
-    def authorize_callback(self, event):
-        spotify.authorize()
-
-    def submit_callback(self, event):
-        if self.redirect_url.text == "":
-            print("Empty")
-        else:
-            self.authorization_data = spotify.fetching_token(self.redirect_url.text)
-            self.profile_data = spotify.get_my_data()
-            self.remove_widgets()
-            self.controls = []
-            self.main_page()
-
     def main_page(self):
         name = self.profile_data["display_name"]
         if len(self.profile_data["images"]) == 0:
@@ -159,14 +149,63 @@ class SpotifyApp(App):
             source=pfp_image_url,
             )
         self.greeting = Label(
-            text=f"Hello {name}!"
+            text=f"Hello {name}!",
         )
+
+        self.playlists_btn = Button(
+            text="Playlists",
+            size_hint= (1,0.5),
+            bold= True,
+            background_color ='#47B5FF',
+        )
+        self.playlists_btn.bind(on_press=self.playlist_callback)
 
         self.controls = [
             self.profile_picture,
-            self.greeting
+            self.greeting,
+            self.playlists_btn
         ]
         self.add_widgets()
+
+    def playlists_page(self):
+        playlist_data = spotify.get_user_playlists()
+        all_playlists = playlist_data["items"]
+
+        for playlist in all_playlists:
+            image = playlist["images"][0]["url"]
+            self.controls.append(
+                    Label(text=playlist["name"])
+                )
+            self.controls.append(
+                AsyncImage(source=image)
+            )
+
+        self.add_widgets()
+    
+    def add_widgets(self):
+        for elem in self.controls:
+            self.window.add_widget(elem)
+
+    def remove_widgets(self):
+        for elem in self.controls:
+            self.window.remove_widget(elem)
+        self.controls = []
+
+    def authorize_callback(self, event):
+        spotify.authorize()
+
+    def submit_callback(self, event):
+        if self.redirect_url.text == "":
+            print("Empty") # make this be a popup
+        else:
+            self.authorization_data = spotify.fetching_token(self.redirect_url.text)
+            self.profile_data = spotify.get_my_data()
+            self.remove_widgets()
+            self.main_page()
+
+    def playlist_callback(self, events):
+        self.remove_widgets()
+        self.playlists_page()
 
 if __name__ == "__main__":
     SpotifyApp().run()
