@@ -150,7 +150,10 @@ class SpotifyApp(App):
 
     def main_page(self):
         name = self.profile_data["display_name"]
-        pfp_image_url = self.profile_data["images"][0]["url"]
+        if len(self.profile_data["images"]) == 0:
+            pfp_image_url = "https://img.freepik.com/free-icon/user_318-644325.jpg"
+        else:
+            pfp_image_url = self.profile_data["images"][0]["url"]
 
         self.profile_picture = AsyncImage(
             source=pfp_image_url,
