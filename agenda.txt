@@ -1,11 +1,14 @@
 '''
 WHAT WILL THIS APP DO?
 
---  login screen --
-- when you press login, you will be transported to the redirect URI site
-- from there, you will be asked to place the entire redirect url on a textbox that is recently placed there
-- there is a button that says "submit" and once pressed, you will be go to the main page
-- will plan to implement them using Tkinter (most simple)
+-- main page --
+- pfp
+- name
+- all playlists saved ig
+- make playlist button
+- remove playlist button
+- search button
+- TBA
 
 - as of now, i dont know but i will try to list down as many functionalities as I can
     - make playlist
