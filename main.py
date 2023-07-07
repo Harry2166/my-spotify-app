@@ -12,7 +12,8 @@ from kivy.uix.label import Label
 from kivy.uix.image import Image, AsyncImage
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
-from kivymd.uix.behaviors.backgroundcolor_behavior import BackgroundColorBehavior
+from kivymd.uix.card import MDCard
+from kivymd.uix.list import OneLineAvatarListItem, ImageLeftWidget
 
 REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
 BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -22,6 +23,28 @@ SCOPE = [
         "playlist-read-collaborative",
         "playlist-read-private"
         ]
+
+colors = {
+    "Teal": {
+        "200": "#212121",
+        "500": "#212121",
+        "700": "#212121",
+    },
+    "Red": {
+        "200": "#C25554",
+        "500": "#C25554",
+        "700": "#C25554",
+    },
+    "Light": {
+        "StatusBar": "E0E0E0",
+        "AppBar": "#202020",
+        "Background": "#2E3032",
+        "CardsDialogs": "#FFFFFF",
+        "FlatButtonDown": "#CCCCCC",
+    },
+}
+
+
 
 class Spotify:
     def __init__(self):
@@ -94,12 +117,16 @@ class SpotifyApp(MDApp):
     authorization_data = ""
     profile_data = ""
     controls = []
-    BackgroundColorBehavior.background = [1,1,1,255]
     def build(self):
         self.window = GridLayout()
         self.window.cols = 1
         self.window.size_hint = (0.6, 0.7)
         self.window.pos_hint = {"center_x": 0.5, "center_y":0.5}
+
+        self.theme_cls.colors = colors
+        self.theme_cls.primary_palette = "Teal"
+        self.theme_cls.accent_palette = "Red"
+
         return self.window
     
     def on_start(self):
@@ -174,10 +201,12 @@ class SpotifyApp(MDApp):
         for playlist in all_playlists:
             image = playlist["images"][0]["url"]
             self.controls.append(
-                    Label(text=playlist["name"])
+                OneLineAvatarListItem(
+                    ImageLeftWidget(source=image),
+                    theme_text_color="Custom",
+                    text_color=(1, 1, 1, 1), 
+                    text=playlist["name"]
                 )
-            self.controls.append(
-                AsyncImage(source=image)
             )
 
         self.add_widgets()
