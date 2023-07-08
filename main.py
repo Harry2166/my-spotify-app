@@ -163,6 +163,10 @@ class SpotifyApp(MDApp):
         ]
 
         self.add_widgets()
+
+    def go_to_main_page(self, event):
+        self.remove_widgets()
+        self.main_page()
     
     def main_page(self):
         name = self.profile_data["display_name"]
@@ -208,7 +212,7 @@ class SpotifyApp(MDApp):
         for track in data["items"]:
             item = Label(text=track["track"]["name"])
             self.controls.append(item)
-
+        self.controls.append(Button(text="Back", on_press=self.playlist_callback))
         self.add_widgets()
 
     def playlists_page(self):
@@ -227,6 +231,7 @@ class SpotifyApp(MDApp):
             self.playlist_ctrls[item] = playlist
             self.controls.append(item)
 
+        self.controls.append(Button(text="Back", on_press=self.go_to_main_page))
         self.add_widgets()
     
     def add_widgets(self):
