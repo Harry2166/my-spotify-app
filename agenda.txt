@@ -2,12 +2,13 @@
 WHAT WILL THIS APP DO?
 
 -- main page --
-- pfp
-- name
-- all playlists saved ig
-- make playlist button
+- pfp ✓
+- name ✓
+- all playlists saved ig ✓
+- make playlist button ✓
 - remove playlist button
 - search button
+- back button -> involves me making the FSM diagram
 - TBA
 
 - as of now, i dont know but i will try to list down as many functionalities as I can

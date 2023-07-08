@@ -44,8 +44,6 @@ colors = {
     },
 }
 
-
-
 class Spotify:
     def __init__(self):
         self.spotify = OAuth2Session(CLIENT_ID, scope=SCOPE, redirect_uri=REDIRECT_URL)
@@ -117,6 +115,7 @@ class SpotifyApp(MDApp):
     authorization_data = ""
     profile_data = ""
     controls = []
+    playlist_ctrls = {}
     def build(self):
         self.window = GridLayout()
         self.window.cols = 1
@@ -194,20 +193,39 @@ class SpotifyApp(MDApp):
         ]
         self.add_widgets()
 
+    def indiv_playlist(self, event):
+        self.remove_widgets()
+        self.go_to_indiv_playlist(self.playlist_ctrls[event])
+
+    def go_to_indiv_playlist(self, data):
+        # get id of the playlist here
+        url = f"https://api.spotify.com/v1/playlists/{data['id']}/tracks"
+        result = get(url, headers=spotify.headers)
+        results = json.loads(result.content)
+        self.indiv_playlist_page(results)
+    
+    def indiv_playlist_page(self, data):
+        for track in data["items"]:
+            item = Label(text=track["track"]["name"])
+            self.controls.append(item)
+
+        self.add_widgets()
+
     def playlists_page(self):
         playlist_data = spotify.get_user_playlists()
         all_playlists = playlist_data["items"]
 
         for playlist in all_playlists:
             image = playlist["images"][0]["url"]
-            self.controls.append(
-                OneLineAvatarListItem(
+            item = OneLineAvatarListItem(
                     ImageLeftWidget(source=image),
                     theme_text_color="Custom",
                     text_color=(1, 1, 1, 1), 
-                    text=playlist["name"]
+                    text=playlist["name"],
+                    on_release = self.indiv_playlist
                 )
-            )
+            self.playlist_ctrls[item] = playlist
+            self.controls.append(item)
 
         self.add_widgets()
     
