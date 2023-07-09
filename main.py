@@ -1,10 +1,12 @@
 
 from config import CLIENT_ID, CLIENT_SECRET
-from requests import post, get
+from requests import post, get, put
 import base64
 import json
 from requests_oauthlib import OAuth2Session
 from requests.auth import HTTPBasicAuth
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 from webbrowser import open
 from kivymd.app import MDApp
 from kivy.uix.gridlayout import GridLayout
@@ -23,7 +25,8 @@ TOKEN_URL = "https://accounts.spotify.com/api/token"
 SCOPE = [
         "user-read-email",
         "playlist-read-collaborative",
-        "playlist-read-private"
+        "playlist-read-private",
+        "user-modify-playback-state"
         ]
 
 colors = {
@@ -49,6 +52,10 @@ colors = {
 class Spotify:
     def __init__(self):
         self.spotify = OAuth2Session(CLIENT_ID, scope=SCOPE, redirect_uri=REDIRECT_URL)
+        # self.spotify = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=CLIENT_ID,
+        #                 client_secret=CLIENT_SECRET,
+        #                 redirect_uri=REDIRECT_URL,
+        #                 scope=SCOPE))
         self.token = self.get_token()
         self.headers = {"Authorization":f"Bearer {self.get_token()}"}
     
@@ -118,6 +125,7 @@ class SpotifyApp(MDApp):
     profile_data = ""
     controls = []
     playlist_ctrls = {}
+    playlist_songs = {}
     def build(self):
         self.window = GridLayout()
         self.window.cols = 1
@@ -218,12 +226,23 @@ class SpotifyApp(MDApp):
 
         for track in data["items"]:
             image = track["track"]["album"]["images"][0]["url"]
-            item = OneLineAvatarListItem(ImageLeftWidget(source=image), text=track["track"]["name"], theme_text_color="Custom", text_color=(1, 1, 1, 1))
+            item = OneLineAvatarListItem(ImageLeftWidget(source=image), text=track["track"]["name"], theme_text_color="Custom", text_color=(1, 1, 1, 1),on_release=self.go_to_play_playlist_song)
+            self.playlist_songs[item] = track["track"]["external_urls"]["spotify"]
             md_list.add_widget(item)
         self.controls.append(Label(text=name, size_hint=(0.1,0.1)))
         self.controls.append(to_be_added_to_controls)
         self.controls.append(Button(text="Back", on_press=self.playlist_callback, size_hint=(0.2, 0.1)))
         self.add_widgets()
+
+    '''
+    turns out that in order to play a song, you have to use spotipy since the method im using for this is weird
+    which, in turn, will make me have to change the entire code around and i am NOT doing that, so until i feel
+    like implementing it and changing the code, this feature will unforunately not be fully implemented.
+    '''
+
+    def go_to_play_playlist_song(self, event):
+        url_of_song = self.playlist_songs[event]
+        open(url_of_song)
 
     def playlists_page(self):
         playlist_data = spotify.get_user_playlists()
