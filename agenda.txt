@@ -18,4 +18,9 @@ WHAT WILL THIS APP DO?
     - remove song from playlist
     - song player
     - search for spotify content
+
+- TO-DO:
+    -> make the indiv playlists page have a list of songs
+    -> when they press the song, it will play the song
+
 '''

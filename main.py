@@ -13,7 +13,8 @@ from kivy.uix.image import Image, AsyncImage
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
 from kivymd.uix.card import MDCard
-from kivymd.uix.list import OneLineAvatarListItem, ImageLeftWidget
+from kivymd.uix.scrollview import MDScrollView
+from kivymd.uix.list import MDList, OneLineAvatarListItem, ImageLeftWidget
 
 REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
 BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -203,21 +204,33 @@ class SpotifyApp(MDApp):
 
     def go_to_indiv_playlist(self, data):
         # get id of the playlist here
+        name_of_playlist = data["name"]
         url = f"https://api.spotify.com/v1/playlists/{data['id']}/tracks"
         result = get(url, headers=spotify.headers)
         results = json.loads(result.content)
-        self.indiv_playlist_page(results)
+        self.indiv_playlist_page(results, name_of_playlist)
     
-    def indiv_playlist_page(self, data):
+    def indiv_playlist_page(self, data, name):
+        to_be_added_to_controls = MDScrollView()
+        md_list = MDList()
+        to_be_added_to_controls.add_widget(md_list)
+
         for track in data["items"]:
-            item = Label(text=track["track"]["name"])
-            self.controls.append(item)
-        self.controls.append(Button(text="Back", on_press=self.playlist_callback))
+            image = track["track"]["album"]["images"][0]["url"]
+            item = OneLineAvatarListItem(ImageLeftWidget(source=image), text=track["track"]["name"], theme_text_color="Custom", text_color=(1, 1, 1, 1))
+            md_list.add_widget(item)
+        self.controls.append(Label(text=name, size_hint=(0.1,0.1)))
+        self.controls.append(to_be_added_to_controls)
+        self.controls.append(Button(text="Back", on_press=self.playlist_callback, size_hint=(0.2, 0.1)))
         self.add_widgets()
 
     def playlists_page(self):
         playlist_data = spotify.get_user_playlists()
         all_playlists = playlist_data["items"]
+
+        to_be_added_to_controls = MDScrollView()
+        md_list = MDList()
+        to_be_added_to_controls.add_widget(md_list)
 
         for playlist in all_playlists:
             image = playlist["images"][0]["url"]
@@ -229,9 +242,11 @@ class SpotifyApp(MDApp):
                     on_release = self.indiv_playlist
                 )
             self.playlist_ctrls[item] = playlist
-            self.controls.append(item)
+            #self.controls.append(item)
+            md_list.add_widget(item)
 
-        self.controls.append(Button(text="Back", on_press=self.go_to_main_page))
+        self.controls.append(to_be_added_to_controls)
+        self.controls.append(Button(text="Back", on_press=self.go_to_main_page, size_hint=(0.2, 0.1)))
         self.add_widgets()
     
     def add_widgets(self):
