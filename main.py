@@ -105,7 +105,7 @@ class Spotify:
     
     def get_user_playlists(self):
         user_id = self.get_my_data()["id"]
-        url = f"https://api.spotify.com/v1/users/{user_id}/playlists?limit=5"
+        url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
         result = get(url, headers=self.headers)
         results = json.loads(result.content)
 
