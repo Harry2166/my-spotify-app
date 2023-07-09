@@ -15,6 +15,7 @@ from kivy.uix.textinput import TextInput
 from kivymd.uix.card import MDCard
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.list import MDList, OneLineAvatarListItem, ImageLeftWidget
+from kivy.uix.popup import Popup
 
 REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
 BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -143,7 +144,7 @@ class SpotifyApp(MDApp):
         self.authorize_button.bind(on_press=self.authorize_callback)
 
         self.redirect_url = TextInput(
-            multiline=False,
+            multiline=True,
             padding_y= (20,20),
             size_hint= (1, 0.5)
             )
@@ -263,7 +264,15 @@ class SpotifyApp(MDApp):
 
     def submit_callback(self, event):
         if self.redirect_url.text == "":
-            print("Empty") # make this be a popup
+            def close_pop(event):
+                popup.dismiss()
+                #return True
+            
+            content_for_popup = Button(text="Close", size_hint=(0.2,0.2))
+            popup = Popup(title="Empty URL", content=content_for_popup, size_hint=(0.15,0.15))
+            content_for_popup.bind(on_press=close_pop)
+            popup.open()
+            #print("Empty") # make this be a popup
         else:
             self.authorization_data = spotify.fetching_token(self.redirect_url.text)
             self.profile_data = spotify.get_my_data()
