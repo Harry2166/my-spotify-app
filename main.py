@@ -177,6 +177,10 @@ class SpotifyApp(MDApp):
     def go_to_main_page(self, event):
         self.remove_widgets()
         self.main_page()
+
+    def go_to_start_page(self,event):
+        self.remove_widgets()
+        self.on_start()
     
     def main_page(self):
         name = self.profile_data["display_name"]
@@ -200,10 +204,19 @@ class SpotifyApp(MDApp):
         )
         self.playlists_btn.bind(on_press=self.playlist_callback)
 
+        self.logout_btn = Button(
+            text="Logout",
+            size_hint= (1,0.5),
+            bold= True,
+            background_color ='#47B5FF',
+        )
+        self.logout_btn.bind(on_press=self.go_to_start_page)
+
         self.controls = [
             self.profile_picture,
             self.greeting,
-            self.playlists_btn
+            self.playlists_btn,
+            self.logout_btn
         ]
         self.add_widgets()
 
@@ -262,7 +275,6 @@ class SpotifyApp(MDApp):
                     on_release = self.indiv_playlist
                 )
             self.playlist_ctrls[item] = playlist
-            #self.controls.append(item)
             md_list.add_widget(item)
 
         self.controls.append(to_be_added_to_controls)
@@ -285,13 +297,11 @@ class SpotifyApp(MDApp):
         if self.redirect_url.text == "":
             def close_pop(event):
                 popup.dismiss()
-                #return True
             
             content_for_popup = Button(text="Close", size_hint=(0.2,0.2))
             popup = Popup(title="Empty URL", content=content_for_popup, size_hint=(0.15,0.15))
             content_for_popup.bind(on_press=close_pop)
             popup.open()
-            #print("Empty") # make this be a popup
         else:
             self.authorization_data = spotify.fetching_token(self.redirect_url.text)
             self.profile_data = spotify.get_my_data()

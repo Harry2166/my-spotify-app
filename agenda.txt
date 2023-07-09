@@ -20,7 +20,7 @@ WHAT WILL THIS APP DO?
     - search for spotify content
 
 - TO-DO:
-    -> make the indiv playlists page have a list of songs
-    -> when they press the song, it will play the song
+    -> make the indiv playlists page have a list of songs ✓
+    -> when they press the song, it will play the song ✓ (???)
 
 '''
