@@ -18,6 +18,7 @@ from kivymd.uix.card import MDCard
 from kivymd.uix.scrollview import MDScrollView
 from kivymd.uix.list import MDList, OneLineAvatarListItem, ImageLeftWidget
 from kivy.uix.popup import Popup
+from kivy.uix.checkbox import CheckBox
 
 REDIRECT_URL = "https://www.google.com" # -> this worked? LOL
 BASE_AUTH_URL = "https://accounts.spotify.com/authorize"
@@ -26,7 +27,9 @@ SCOPE = [
         "user-read-email",
         "playlist-read-collaborative",
         "playlist-read-private",
-        "user-modify-playback-state"
+        "user-modify-playback-state",
+        "playlist-modify-public",
+        "playlist-modify-private"
         ]
 
 colors = {
@@ -132,6 +135,15 @@ class Spotify:
 
         return results
     
+    def make_playlist(self, name_of_playlist, is_public):
+        user_id = self.get_my_data()["id"]
+        url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
+        result = put(url=url,headers=self.headers,data={
+            "name" : name_of_playlist,
+            "public" : is_public
+        })
+        return result
+    
 spotify = Spotify()
 
 class SpotifyApp(MDApp):
@@ -140,6 +152,7 @@ class SpotifyApp(MDApp):
     controls = []
     playlist_ctrls = {}
     playlist_songs = {}
+    default_image = "https://img.freepik.com/free-icon/user_318-644325.jpg"
     def build(self):
         self.window = GridLayout()
         self.window.cols = 1
@@ -198,10 +211,7 @@ class SpotifyApp(MDApp):
     
     def main_page(self):
         name = self.profile_data["display_name"]
-        if len(self.profile_data["images"]) == 0:
-            pfp_image_url = "https://img.freepik.com/free-icon/user_318-644325.jpg"
-        else:
-            pfp_image_url = self.profile_data["images"][0]["url"]
+        pfp_image_url = self.default_image if len(self.profile_data["images"]) == 0 else self.profile_data["images"][0]["url"]
 
         self.search_bar = TextInput(
             hint_text="Search",
@@ -255,7 +265,7 @@ class SpotifyApp(MDApp):
         to_be_added_to_controls.add_widget(md_list)
 
         for item in data["albums"]["items"]: 
-            image = item["images"][0]["url"]
+            image = self.default_image if len(item["images"]) == 0 else item["images"][0]["url"]
             name = item["name"]
             url = item["external_urls"]["spotify"]
 
@@ -274,13 +284,7 @@ class SpotifyApp(MDApp):
             self.remove_widgets()
             self.search_page(self.search_bar.text, search_data)
         else:
-            def close_pop(event):
-                popup.dismiss()
-            
-            content_for_popup = Button(text="Close")
-            popup = Popup(title="Empty Search Bar", content=content_for_popup, size_hint=(0.2,0.2))
-            content_for_popup.bind(on_press=close_pop)
-            popup.open()
+            self.show_error_popup("Empty Search Bar")
 
     def indiv_playlist(self, event):
         self.remove_widgets()
@@ -300,7 +304,7 @@ class SpotifyApp(MDApp):
         to_be_added_to_controls.add_widget(md_list)
 
         for track in data["items"]:
-            image = track["track"]["album"]["images"][0]["url"]
+            image = self.default_image if len(track["track"]["album"]["images"]) == 0 else track["track"]["album"]["images"][0]["url"]
             item = OneLineAvatarListItem(ImageLeftWidget(source=image), text=track["track"]["name"], theme_text_color="Custom", text_color=(1, 1, 1, 1),on_release=self.go_to_play_playlist_song)
             self.playlist_songs[item] = track["track"]["external_urls"]["spotify"]
             md_list.add_widget(item)
@@ -328,7 +332,7 @@ class SpotifyApp(MDApp):
         to_be_added_to_controls.add_widget(md_list)
 
         for playlist in all_playlists:
-            image = playlist["images"][0]["url"]
+            image = self.default_image if len(playlist["images"]) == 0 else playlist["images"][0]["url"]
             item = OneLineAvatarListItem(
                     ImageLeftWidget(source=image),
                     theme_text_color="Custom",
@@ -340,8 +344,49 @@ class SpotifyApp(MDApp):
             md_list.add_widget(item)
 
         self.controls.append(to_be_added_to_controls)
+        self.controls.append(Button(text="Make Playlist", size_hint=(0.2, 0.1), on_press=self.go_to_make_playlist))
         self.controls.append(Button(text="Back", on_press=self.go_to_main_page, size_hint=(0.2, 0.1)))
         self.add_widgets()
+
+    def make_playlist(self, event):
+        print(self.publicity.active)
+        if self.get_name.text != "":
+            def close_pop(event):
+                popup.dismiss()
+                self.remove_widgets()
+                self.playlists_page()
+            spotify.make_playlist(self.get_name.text, self.publicity.active)
+            content_for_popup = Button(text="Close")
+            popup = Popup(title="Playlist Created!", content=content_for_popup, size_hint=(0.2,0.2))
+            content_for_popup.bind(on_press=close_pop)
+            popup.open()
+        else:
+            self.show_error_popup("Empty Name")
+
+    def make_playlist_page(self):
+        self.get_name = TextInput(
+            hint_text = "Name of Playlist",
+            size_hint=(0.2, 0.1)
+        )
+
+        self.publicity = CheckBox(
+        ) #disabled
+
+        self.make_playlist_button = Button(
+            text="Create playlist",
+            on_press = self.make_playlist,
+            size_hint=(0.2, 0.1)
+        )
+
+        self.controls.append(self.get_name)
+        self.controls.append(Label(text="Make public", size_hint=(0.2, 0.1)))
+        self.controls.append(self.publicity)
+        self.controls.append(self.make_playlist_button)
+        self.add_widgets()
+
+    def go_to_make_playlist(self, event):
+        self.remove_widgets()
+        self.make_playlist_page()
     
     def add_widgets(self):
         for elem in self.controls:
@@ -355,15 +400,18 @@ class SpotifyApp(MDApp):
     def authorize_callback(self, event):
         spotify.authorize()
 
+    def show_error_popup(self, text):
+        def close_pop(event):
+            popup.dismiss()
+            
+        content_for_popup = Button(text="Close")
+        popup = Popup(title=text, content=content_for_popup, size_hint=(0.2,0.2))
+        content_for_popup.bind(on_press=close_pop)
+        popup.open()
+
     def submit_callback(self, event):
         if self.redirect_url.text == "":
-            def close_pop(event):
-                popup.dismiss()
-            
-            content_for_popup = Button(text="Close")
-            popup = Popup(title="Empty URL", content=content_for_popup, size_hint=(0.2,0.2))
-            content_for_popup.bind(on_press=close_pop)
-            popup.open()
+            self.show_error_popup("Empty URL")
         else:
             self.authorization_data = spotify.fetching_token(self.redirect_url.text)
             self.profile_data = spotify.get_my_data()
