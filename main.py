@@ -277,8 +277,8 @@ class SpotifyApp(MDApp):
             def close_pop(event):
                 popup.dismiss()
             
-            content_for_popup = Button(text="Close", size_hint=(0.2,0.2))
-            popup = Popup(title="Empty Search Bar", content=content_for_popup, size_hint=(0.15,0.15))
+            content_for_popup = Button(text="Close")
+            popup = Popup(title="Empty Search Bar", content=content_for_popup, size_hint=(0.2,0.2))
             content_for_popup.bind(on_press=close_pop)
             popup.open()
 
@@ -360,8 +360,8 @@ class SpotifyApp(MDApp):
             def close_pop(event):
                 popup.dismiss()
             
-            content_for_popup = Button(text="Close", size_hint=(0.2,0.2))
-            popup = Popup(title="Empty URL", content=content_for_popup, size_hint=(0.15,0.15))
+            content_for_popup = Button(text="Close")
+            popup = Popup(title="Empty URL", content=content_for_popup, size_hint=(0.2,0.2))
             content_for_popup.bind(on_press=close_pop)
             popup.open()
         else:
