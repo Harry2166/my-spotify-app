@@ -138,10 +138,10 @@ class Spotify:
     def make_playlist(self, name_of_playlist, is_public):
         user_id = self.get_my_data()["id"]
         url = f"https://api.spotify.com/v1/users/{user_id}/playlists"
-        result = put(url=url,headers=self.headers,data={
+        result = post(url=url,headers=self.headers,data=json.dumps({
             "name" : name_of_playlist,
             "public" : is_public
-        })
+        }))
         return result
     
 spotify = Spotify()
