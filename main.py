@@ -87,14 +87,28 @@ class Spotify:
         token = json_result["access_token"]
         return token
 
-    def get_spotify_id(self,id,limit=1):
+    def get_spotify_id(self,id):
         url = "https://api.spotify.com/v1/search"
-        query = f"?q={id}&type=artist&limit={limit}"
+        query = f"?q={id}&type=artist"
 
         query_url = url + query
         result = self.spotify.get(query_url, headers=self.headers)
-        results = json.loads(result.content)  
+        results = json.loads(result.content)
+        results = self.search_in_spotify(id)
         return results["artists"]["items"][0]["id"]
+    
+    def search_in_spotify(self, keyword):
+        url = "https://api.spotify.com/v1/search"
+        types = ["album", "artist", "playlist", "track", "show", "episode", "audiobook"]
+        result = get(
+            url=url,
+            headers=self.headers,
+            params= {
+                "q" : keyword,
+                "type" : types
+            })
+        results = json.loads(result.content)
+        return results
     
     def get_artist(self, artist):
         artist_id = self.get_spotify_id(artist)
@@ -189,6 +203,18 @@ class SpotifyApp(MDApp):
         else:
             pfp_image_url = self.profile_data["images"][0]["url"]
 
+        self.search_bar = TextInput(
+            hint_text="Search",
+            multiline=False,
+            size_hint=(0.5,0.5))
+        
+        self.search_button = Button(
+            text="Search",
+            size_hint=(0.3,0.5),
+            background_color ='#47B5FF'
+        )
+        self.search_button.bind(on_press=self.searching)
+
         self.profile_picture = AsyncImage(
             source=pfp_image_url,
             )
@@ -213,12 +239,48 @@ class SpotifyApp(MDApp):
         self.logout_btn.bind(on_press=self.go_to_start_page)
 
         self.controls = [
+            self.search_bar,
+            self.search_button,
             self.profile_picture,
             self.greeting,
             self.playlists_btn,
             self.logout_btn
         ]
         self.add_widgets()
+
+    def search_page(self, searched, data):
+        title = Label(text=searched, size_hint=(0.2, 0.1))
+        to_be_added_to_controls = MDScrollView()
+        md_list = MDList()
+        to_be_added_to_controls.add_widget(md_list)
+
+        for item in data["albums"]["items"]: 
+            image = item["images"][0]["url"]
+            name = item["name"]
+            url = item["external_urls"]["spotify"]
+
+            output = OneLineAvatarListItem(ImageLeftWidget(source=image), text=name, theme_text_color="Custom", text_color=(1, 1, 1, 1),on_release=self.go_to_play_playlist_song)
+            self.playlist_songs[output] = url
+            md_list.add_widget(output)
+
+        self.controls.append(title)
+        self.controls.append(to_be_added_to_controls)
+        self.controls.append(Button(text="Back", on_press=self.go_to_main_page, size_hint=(0.2, 0.1)))
+        self.add_widgets()
+
+    def searching(self, event):
+        if self.search_bar.text != "":
+            search_data = spotify.search_in_spotify(self.search_bar.text)
+            self.remove_widgets()
+            self.search_page(self.search_bar.text, search_data)
+        else:
+            def close_pop(event):
+                popup.dismiss()
+            
+            content_for_popup = Button(text="Close", size_hint=(0.2,0.2))
+            popup = Popup(title="Empty Search Bar", content=content_for_popup, size_hint=(0.15,0.15))
+            content_for_popup.bind(on_press=close_pop)
+            popup.open()
 
     def indiv_playlist(self, event):
         self.remove_widgets()

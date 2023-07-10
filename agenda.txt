@@ -7,8 +7,8 @@ WHAT WILL THIS APP DO?
 - all playlists saved ig ✓
 - make playlist button ✓
 - remove playlist button
-- search button
-- back button -> involves me making the FSM diagram
+- search button ✓
+- back button -> involves me making the FSM diagram ✓
 - TBA
 
 - as of now, i dont know but i will try to list down as many functionalities as I can
@@ -18,9 +18,5 @@ WHAT WILL THIS APP DO?
     - remove song from playlist
     - song player
     - search for spotify content
-
-- TO-DO:
-    -> make the indiv playlists page have a list of songs ✓
-    -> when they press the song, it will play the song ✓ (???)
 
 '''
