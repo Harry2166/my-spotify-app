@@ -369,8 +369,7 @@ class SpotifyApp(MDApp):
             size_hint=(0.2, 0.1)
         )
 
-        self.publicity = CheckBox(
-        ) #disabled
+        self.publicity = CheckBox(size_hint=(0.2, 0.1))
 
         self.make_playlist_button = Button(
             text="Create playlist",
@@ -379,7 +378,7 @@ class SpotifyApp(MDApp):
         )
 
         self.controls.append(self.get_name)
-        self.controls.append(Label(text="Make public", size_hint=(0.2, 0.1)))
+        self.controls.append(Label(text="Make public",size_hint=(0.2, 0.1)))
         self.controls.append(self.publicity)
         self.controls.append(self.make_playlist_button)
         self.add_widgets()
