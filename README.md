@@ -1,10 +1,10 @@
 # my-spotify-app
 A Python app made using Kivy as its GUI framework, wherein it uses the Spotify API to:
-    1. Display Spotify profile
-    2. Search on Spotify
-    3. Show playlists
-    4. Make playlists
-    5. Access the page of a song, album, etc.
+1. Display Spotify profile
+2. Search on Spotify
+3. Show playlists
+4. Make playlists
+5. Access the page of a song, album, etc.
 
 ## Installation
 As of the moment, you will not be able to access the software properly because the application is still in development mode.
