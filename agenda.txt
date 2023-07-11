@@ -6,17 +6,16 @@ WHAT WILL THIS APP DO?
 - name ✓
 - all playlists saved ig ✓
 - make playlist button ✓
-- remove playlist button
+- remove playlist button (not possible)
 - search button ✓
 - back button -> involves me making the FSM diagram ✓
-- TBA
 
 - as of now, i dont know but i will try to list down as many functionalities as I can
-    - make playlist
-    - delete playlist
-    - add song to playlist
-    - remove song from playlist
-    - song player
-    - search for spotify content
+    - make playlist ✓
+    - delete playlist (not possible)
+    - add song to playlist (future feature)
+    - remove song from playlist (future feature)
+    - song player (future feature) -> will need to refactor code
+    - search for spotify content ✓
 
 '''
